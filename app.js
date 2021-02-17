@@ -1,8 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-
-const rootDir = require('./util/path');
+const expressHbs = require('express-handlebars');
 
 // own routes
 const adminRoutes = require('./routes/admin');
@@ -12,7 +11,8 @@ const shopRoutes = require('./routes/shop');
 const app = express();
 
 // set custom views engine
-app.set('view engine', 'pug');
+app.engine('hbs', expressHbs({layoutsDir: 'views/layouts', defaultLayout: 'main-layout', extname: 'hbs'}));
+app.set('view engine', 'hbs');
 
 // use body parser
 app.use(bodyParser.urlencoded({extended: false}));

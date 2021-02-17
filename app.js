@@ -6,6 +6,9 @@ const path = require('path');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
+// own controller
+const errorController = require('./controllers/error');
+
 // setup express app
 const app = express();
 
@@ -18,13 +21,11 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // setup routes
-app.use('/admin', adminRoutes.routes);
+app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 // catch all 404s
-app.use(((req, res, next) => {
-    res.render('404', {pageTitle: 'Page not found', path: ""});
-}));
+app.use(errorController.get404);
 
 // listen on port xxxx
 app.listen(3000);

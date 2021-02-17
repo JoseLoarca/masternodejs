@@ -11,6 +11,9 @@ const shopRoutes = require('./routes/shop');
 // setup express app
 const app = express();
 
+// set custom views engine
+app.set('view engine', 'pug');
+
 // use body parser
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -21,7 +24,7 @@ app.use(shopRoutes);
 
 // catch all 404s
 app.use(((req, res, next) => {
-    res.sendFile(path.join(rootDir, 'views', '404.html'));
+    res.render('404', {pageTitle: 'Page not found'});
 }));
 
 // listen on port xxxx

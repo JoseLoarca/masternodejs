@@ -1,5 +1,4 @@
 const Product = require('../models/product');
-const Cart = require('../models/cart');
 
 exports.getProducts = (req, res, next) => {
     Product.findAll().then(products => {
@@ -99,11 +98,42 @@ exports.deleteCart = (req, res, next) => {
         .catch(err => console.log(err));
 }
 
+exports.postOrder = (req, res, next) => {
+    let fetchedCart;
+    req.user.getCart()
+        .then(cart => {
+            fetchedCart = cart;
+            return cart.getProducts();
+        })
+        .then(products => {
+            return req.user.createOrder()
+                .then(order => {
+                    order.addProducts(products.map(product => {
+                        product.orderItem = { quantity: product.cartItem.quantity };
+                        return product;
+                    }));
+                })
+                .catch(err => console.log(err));
+        })
+        .then(result => {
+            return fetchedCart.setProducts(null);
+        })
+        .then(result => {
+            res.redirect('/orders');
+        })
+        .catch(err => console.log(err));
+}
+
 exports.getOrders = (req, res, next) => {
-    res.render('shop/orders', {
-        pageTitle: 'Your Orders',
-        path: '/orders'
-    });
+    req.user.getOrders({ include: ['products']})
+        .then(orders => {
+            res.render('shop/orders', {
+                pageTitle: 'Your Orders',
+                path: '/orders',
+                orders: orders
+            });
+        })
+        .catch(err => console.log(err));
 }
 
 exports.getCheckout = (req, res, next) => {

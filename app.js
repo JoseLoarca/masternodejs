@@ -3,14 +3,14 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 // own routes
-// const adminRoutes = require('./routes/admin');
-// const shopRoutes = require('./routes/shop');
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
 
 // own controller
 const errorController = require('./controllers/error');
 
 // mongodb connection
-const mongoConnect = require('./util/database');
+const mongoConnect = require('./util/database').mongoConnect;
 
 // setup express app
 const app = express();
@@ -31,16 +31,16 @@ app.use((req, res, next) => {
     //     next();
     // })
     // .catch(err => console.log(err));
+    next();
 })
 
 // setup routes
-// app.use('/admin', adminRoutes);
-// app.use(shopRoutes);
+app.use('/admin', adminRoutes);
+app.use(shopRoutes);
 
 // catch all 404s
 app.use(errorController.get404);
 
-mongoConnect((client) => {
-    console.log(client);
+mongoConnect(() => {
     app.listen(3000);
 })

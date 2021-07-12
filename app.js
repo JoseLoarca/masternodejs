@@ -12,6 +12,9 @@ const errorController = require('./controllers/error');
 // mongodb connection
 const mongoConnect = require('./util/database').mongoConnect;
 
+// mongodb models
+const User = require('./models/user');
+
 // setup express app
 const app = express();
 
@@ -25,13 +28,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // append user to request
 app.use((req, res, next) => {
-    // User.findByPk(1)
-    // .then(user => {
-    //     req.user = user;
-    //     next();
-    // })
-    // .catch(err => console.log(err));
-    next();
+    User.findById('60eb902450f8a60329b3e91d')
+    .then(user => {
+        req.user = user;
+        next();
+    })
+    .catch(err => console.log(err));
 })
 
 // setup routes

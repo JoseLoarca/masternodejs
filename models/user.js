@@ -22,7 +22,7 @@ class User {
     }
 
     /**
-     * Add a new Product to a User's cart
+     * Add a new Product to User's cart
      *
      * @param product
      */
@@ -45,6 +45,50 @@ class User {
         return db
             .collection('users')
             .updateOne({_id: new ObjectId(this._id)}, {$set: {cart: updatedCart}})
+    }
+
+    /**
+     * Return User's cart
+     *
+     * @returns {*}
+     */
+    getCart() {
+        const db = getDb();
+        const productIds = this.cart.items.map(i => {
+            return i.productId;
+        });
+        return db
+            .collection('products')
+            .find({_id: {$in: productIds}})
+            .toArray()
+            .then(products => {
+                return products.map(p => {
+                    return {
+                        ...p, quantity: this.cart.items.find(i => {
+                            return i.productId.toString() === p._id.toString();
+                        }).quantity
+                    }
+                })
+            });
+    }
+
+    /**
+     * Delete a specific product from User's cart
+     *
+     * @param productId
+     */
+    deleteItemFromCart(productId) {
+        const updatedCartItems = this.cart.items.filter(item => {
+            return item.productId.toString() !== productId.toString();
+        });
+
+        const db = getDb();
+        return db
+            .collection('users')
+            .updateOne(
+                {_id: new ObjectId(this._id)},
+                {$set: {cart: {items: updatedCartItems}}}
+            );
     }
 
     /**

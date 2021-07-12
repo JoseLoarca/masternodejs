@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -9,8 +10,8 @@ const shopRoutes = require('./routes/shop');
 // own controller
 const errorController = require('./controllers/error');
 
-// mongodb connection
-const mongoConnect = require('./util/database').mongoConnect;
+// import mongoose
+const mongoose = require('mongoose');
 
 // mongodb models
 const User = require('./models/user');
@@ -43,6 +44,9 @@ app.use(shopRoutes);
 // catch all 404s
 app.use(errorController.get404);
 
-mongoConnect(() => {
+mongoose.connect(process.env.MONGO_CONNECTION)
+    .then(result => {
     app.listen(3000);
+}).catch(err => {
+    console.log(err);
 })

@@ -41,7 +41,7 @@ userSchema.methods.addToCart = function (product) {
         items: updatedCartItems
     };
 
-    this.save();
+    return this.save();
 };
 
 userSchema.methods.removeFromCart = function (productId) {

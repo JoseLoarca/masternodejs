@@ -14,7 +14,7 @@ const errorController = require('./controllers/error');
 const mongoose = require('mongoose');
 
 // mongodb models
-const User = require('./models/user');
+// const User = require('./models/user');
 
 // setup express app
 const app = express();
@@ -28,14 +28,14 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // append user to request
-app.use((req, res, next) => {
-    User.findById('60eb902450f8a60329b3e91d')
-    .then(user => {
-        req.user = new User(user.name, user.email, user.cart, user._id)
-        next();
-    })
-    .catch(err => console.log(err));
-})
+// app.use((req, res, next) => {
+//     User.findById('60eb902450f8a60329b3e91d')
+//     .then(user => {
+//         req.user = new User(user.name, user.email, user.cart, user._id)
+//         next();
+//     })
+//     .catch(err => console.log(err));
+// })
 
 // setup routes
 app.use('/admin', adminRoutes);

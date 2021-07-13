@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const Order = require('../models/order');
 
 exports.getProducts = (req, res, next) => {
     Product.find().then(products => {
@@ -24,7 +25,7 @@ exports.getProduct = (req, res, next) => {
 }
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll().then(products => {
+    Product.find().then(products => {
         res.render('shop/product-list', {
             prods: products,
             pageTitle: 'Shop',
@@ -74,26 +75,37 @@ exports.postCartDeleteProduct = (req, res, next) => {
 }
 
 exports.postOrder = (req, res, next) => {
-    let fetchedCart;
     req.user
-        .addOrder()
-        .then(result => {
-            res.redirect('/orders');
+        .populate('cart.items.productId')
+        .execPopulate()
+        .then(user => {
+            const products = user.cart.items.map(i => {
+                return {quantity: i.quantity, product: {...i.productId._doc}};
+            });
+            const order = new Order({
+                user: {
+                    name: req.user.name,
+                    userId: req.user
+                },
+                products: products
+            });
+            return order.save();
         })
-        .catch(err => console.log(err));
+        .then(result => {
+            return req.user.clearCart();
+        }).then(() => {
+        res.redirect('/orders');
+    }).catch(err => console.log(err));
 }
 
 exports.getOrders = (req, res, next) => {
-    req.user
-        .getOrders()
-        .then(orders => {
-            res.render('shop/orders', {
-                pageTitle: 'Your Orders',
-                path: '/orders',
-                orders: orders
-            });
-        })
-        .catch(err => console.log(err));
+    Order.find({'user.userId': req.user._id}).then(orders => {
+        res.render('shop/orders', {
+            pageTitle: 'Your Orders',
+            path: '/orders',
+            orders: orders
+        });
+    }).catch(err => console.log(err));
 }
 
 // exports.getCheckout = (req, res, next) => {

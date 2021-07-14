@@ -17,23 +17,25 @@ app.set('views', 'views');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // append user to request
 app.use((req, res, next) => {
     User.findById('60ed156d3bb1d02760d73603')
-    .then(user => {
-      req.user = user;
-      next();
-    })
-    .catch(err => console.log(err));
+        .then(user => {
+            req.user = user;
+            next();
+        })
+        .catch(err => console.log(err));
 });
 
 // setup routes
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
+app.use(authRoutes);
 
 // catch all 404s
 app.use(errorController.get404);
@@ -52,8 +54,9 @@ mongoose.connect(process.env.MONGO_CONNECTION)
                 user.save();
             }
         });
-    app.listen(3000);
-  })
-  .catch(err => {
-    console.log(err);
-  });
+        app.listen(3000);
+        console.log('Connected!')
+    })
+    .catch(err => {
+        console.log(err);
+    });

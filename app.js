@@ -4,12 +4,18 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
 // setup express app
 const app = express();
+const store = new MongoDBStore({
+    uri: process.env.MONGO_CONNECTION,
+    collection: 'sessions'
+});
 
 // set custom views engine
 app.set('view engine', 'ejs');
@@ -21,15 +27,24 @@ const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789',
+    resave: false,
+    saveUninitialized: false,
+    store: store
+}));
 
-// append user to request
 app.use((req, res, next) => {
-    User.findById('60ed156d3bb1d02760d73603')
-        .then(user => {
-            req.user = user;
-            next();
-        })
-        .catch(err => console.log(err));
+    if (!req.session.user) {
+        next();
+    } else {
+        User.findById(req.session.user._id)
+            .then(user => {
+                req.user = user;
+                next();
+            })
+            .catch(err => console.log(err));
+    }
 });
 
 // setup routes
